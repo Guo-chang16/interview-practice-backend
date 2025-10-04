@@ -168,7 +168,6 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
             return QuestionVO.objToVo(question);
         }).collect(Collectors.toList());
 
-        // todo 可以根据需要为封装对象补充值，不需要的内容可以删除
         // region 可选
         // 1. 关联查询用户信息
         Set<Long> userIdSet = questionList.stream().map(Question::getUserId).collect(Collectors.toSet());
@@ -195,6 +194,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
      * @param questionQueryRequest
      * @return
      */
+    // TODO 待完善
     public Page<Question> listQuestionByPage(QuestionQueryRequest questionQueryRequest) {
         long current = questionQueryRequest.getCurrent();
         long size = questionQueryRequest.getPageSize();
