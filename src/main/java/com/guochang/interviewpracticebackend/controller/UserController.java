@@ -37,8 +37,6 @@ import static com.guochang.interviewpracticebackend.service.impl.UserServiceImpl
 /**
  * 用户接口
  *
- * @author <a href="https://github.com/liyupi">程序员鱼皮</a>
- * @from <a href="https://yupi.icu">编程导航知识星球</a>
  */
 @RestController
 @RequestMapping("/user")
@@ -47,9 +45,6 @@ public class UserController {
 
     @Resource
     private UserService userService;
-
-
-    // region 登录相关
 
     /**
      * 用户注册
@@ -122,13 +117,8 @@ public class UserController {
         return Result.success(userService.getLoginUserVO(user));
     }
 
-    // endregion
-
-    // region 增删改查
-
     /**
      * 创建用户
-     *
      * @param userAddRequest
      * @param request
      * @return
@@ -141,8 +131,8 @@ public class UserController {
         }
         User user = new User();
         BeanUtils.copyProperties(userAddRequest, user);
-        // 默认密码 12345678
-        String defaultPassword = "12345678";
+        // 默认密码 20061105
+        String defaultPassword = "20061105";
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + defaultPassword).getBytes());
         user.setUserPassword(encryptPassword);
         boolean result = userService.save(user);
@@ -169,7 +159,6 @@ public class UserController {
 
     /**
      * 更新用户
-     *
      * @param userUpdateRequest
      * @param request
      * @return
@@ -254,7 +243,7 @@ public class UserController {
         long current = userQueryRequest.getCurrent();
         long size = userQueryRequest.getPageSize();
         // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(size > 10, ErrorCode.PARAMS_ERROR);
         Page<User> userPage = userService.page(new Page<>(current, size),
                 userService.getQueryWrapper(userQueryRequest));
         Page<UserVO> userVOPage = new Page<>(current, size, userPage.getTotal());
