@@ -1,12 +1,12 @@
-/*
-package com.guochang.springinitproject.aop;
+package com.guochang.interviewpracticebackend.aop;
 
 
-import com.guochang.springinitproject.annotation.AuthCheck;
-import com.guochang.springinitproject.common.ErrorCode;
-import com.guochang.springinitproject.exception.BusinessException;
-import com.guochang.springinitproject.model.entity.User;
-import com.guochang.springinitproject.model.enums.UserRoleEnum;
+import com.guochang.interviewpracticebackend.annotation.AuthCheck;
+import com.guochang.interviewpracticebackend.common.ErrorCode;
+import com.guochang.interviewpracticebackend.exception.BusinessException;
+import com.guochang.interviewpracticebackend.model.entity.User;
+import com.guochang.interviewpracticebackend.model.enums.UserRoleEnum;
+import com.guochang.interviewpracticebackend.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -51,4 +51,3 @@ public class AuthInterceptor {
         return joinPoint.proceed();
     }
 }
-*/
