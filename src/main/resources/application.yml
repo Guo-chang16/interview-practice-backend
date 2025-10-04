@@ -1,19 +1,20 @@
 spring:
   application:
     name: spring-init-project
+  profiles:
+    active: local
 
   # ?????
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/interview_practice?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8
-    username: root
-    password: 123456
 
 
 server:
   port: 8150
   servlet:
     context-path: /api
+
 
 
 # springdoc-openapi
