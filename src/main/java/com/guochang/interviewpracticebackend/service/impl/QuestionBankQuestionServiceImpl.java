@@ -136,9 +136,7 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         // 对象转封装类
         QuestionBankQuestionVO questionBankQuestionVO = QuestionBankQuestionVO.objToVo(questionBankQuestion);
 
-        // todo 可以根据需要为封装对象补充值，不需要的内容可以删除
-        // region 可选
-        // 1. 关联查询用户信息
+        // 关联查询用户信息
         Long userId = questionBankQuestion.getUserId();
         User user = null;
         if (userId != null && userId > 0) {
@@ -146,7 +144,6 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         }
         UserVO userVO = userService.getUserVO(user);
         questionBankQuestionVO.setUser(userVO);
-        // endregion
 
         return questionBankQuestionVO;
     }
@@ -170,9 +167,9 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
             return QuestionBankQuestionVO.objToVo(questionBankQuestion);
         }).collect(Collectors.toList());
 
-        // todo 可以根据需要为封装对象补充值，不需要的内容可以删除
         // region 可选
-        // 1. 关联查询用户信息
+        // 关联查询用户信息
+        /*
         Set<Long> userIdSet = questionBankQuestionList.stream().map(QuestionBankQuestion::getUserId).collect(Collectors.toSet());
         Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
@@ -185,6 +182,7 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
             }
             questionBankQuestionVO.setUser(userService.getUserVO(user));
         });
+        */
         // endregion
 
         questionBankQuestionVOPage.setRecords(questionBankQuestionVOList);

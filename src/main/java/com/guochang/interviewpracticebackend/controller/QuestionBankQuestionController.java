@@ -54,12 +54,10 @@ public class QuestionBankQuestionController {
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addQuestionBankQuestion(@RequestBody QuestionBankQuestionAddRequest questionBankQuestionAddRequest, HttpServletRequest request) {
         ThrowUtils.throwIf(questionBankQuestionAddRequest == null, ErrorCode.PARAMS_ERROR);
-        // todo 在此处将实体类和 DTO 进行转换
         QuestionBankQuestion questionBankQuestion = new QuestionBankQuestion();
         BeanUtils.copyProperties(questionBankQuestionAddRequest, questionBankQuestion);
         // 数据校验
         questionBankQuestionService.validQuestionBankQuestion(questionBankQuestion, true);
-        // todo 填充默认值
         User loginUser = userService.getLoginUser(request);
         questionBankQuestion.setUserId(loginUser.getId());
         // 写入数据库
@@ -109,7 +107,6 @@ public class QuestionBankQuestionController {
         if (questionBankQuestionUpdateRequest == null || questionBankQuestionUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        // todo 在此处将实体类和 DTO 进行转换
         QuestionBankQuestion questionBankQuestion = new QuestionBankQuestion();
         BeanUtils.copyProperties(questionBankQuestionUpdateRequest, questionBankQuestion);
         // 数据校验
@@ -170,7 +167,7 @@ public class QuestionBankQuestionController {
         long current = questionBankQuestionQueryRequest.getCurrent();
         long size = questionBankQuestionQueryRequest.getPageSize();
         // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(size > 10, ErrorCode.PARAMS_ERROR);
         // 查询数据库
         Page<QuestionBankQuestion> questionBankQuestionPage = questionBankQuestionService.page(new Page<>(current, size),
                 questionBankQuestionService.getQueryWrapper(questionBankQuestionQueryRequest));
@@ -195,7 +192,7 @@ public class QuestionBankQuestionController {
         long current = questionBankQuestionQueryRequest.getCurrent();
         long size = questionBankQuestionQueryRequest.getPageSize();
         // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        ThrowUtils.throwIf(size > 10, ErrorCode.PARAMS_ERROR);
         // 查询数据库
         Page<QuestionBankQuestion> questionBankQuestionPage = questionBankQuestionService.page(new Page<>(current, size),
                 questionBankQuestionService.getQueryWrapper(questionBankQuestionQueryRequest));
