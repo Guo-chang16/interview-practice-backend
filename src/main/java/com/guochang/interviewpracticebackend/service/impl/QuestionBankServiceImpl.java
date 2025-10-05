@@ -151,9 +151,7 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
             return QuestionBankVO.objToVo(questionBank);
         }).collect(Collectors.toList());
 
-        // todo 可以根据需要为封装对象补充值，不需要的内容可以删除
-        // region 可选
-        // 1. 关联查询用户信息
+        // 关联查询用户信息
         Set<Long> userIdSet = questionBankList.stream().map(QuestionBank::getUserId).collect(Collectors.toSet());
         Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet).stream()
                 .collect(Collectors.groupingBy(User::getId));
@@ -166,7 +164,6 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
             }
             questionBankVO.setUser(userService.getUserVO(user));
         });
-        // endregion
 
         questionBankVOPage.setRecords(questionBankVOList);
         return questionBankVOPage;
