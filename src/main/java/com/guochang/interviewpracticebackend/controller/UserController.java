@@ -15,9 +15,6 @@ import com.guochang.interviewpracticebackend.model.entity.User;
 import com.guochang.interviewpracticebackend.model.vo.LoginUserVO;
 import com.guochang.interviewpracticebackend.model.vo.UserVO;
 import com.guochang.interviewpracticebackend.service.UserService;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -29,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;

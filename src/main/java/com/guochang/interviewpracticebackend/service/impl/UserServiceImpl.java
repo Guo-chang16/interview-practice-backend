@@ -15,8 +15,6 @@ import com.guochang.interviewpracticebackend.model.vo.LoginUserVO;
 import com.guochang.interviewpracticebackend.model.vo.UserVO;
 import com.guochang.interviewpracticebackend.service.UserService;
 import com.guochang.interviewpracticebackend.utils.SqlUtils;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RBitSet;
@@ -25,6 +23,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.*;

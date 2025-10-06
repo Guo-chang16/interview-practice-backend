@@ -20,11 +20,13 @@ import com.guochang.interviewpracticebackend.model.entity.User;
 import com.guochang.interviewpracticebackend.model.vo.QuestionBankQuestionVO;
 import com.guochang.interviewpracticebackend.service.QuestionBankQuestionService;
 import com.guochang.interviewpracticebackend.service.UserService;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
+ 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 
 /**

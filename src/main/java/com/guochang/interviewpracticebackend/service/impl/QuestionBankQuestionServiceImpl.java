@@ -21,13 +21,13 @@ import com.guochang.interviewpracticebackend.service.QuestionBankService;
 import com.guochang.interviewpracticebackend.service.QuestionService;
 import com.guochang.interviewpracticebackend.service.UserService;
 import com.guochang.interviewpracticebackend.utils.SqlUtils;
-import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

@@ -6,7 +6,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.guochang.interviewpracticebackend.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
 import com.guochang.interviewpracticebackend.model.entity.QuestionBankQuestion;
 import com.guochang.interviewpracticebackend.model.vo.QuestionBankQuestionVO;
-import jakarta.servlet.http.HttpServletRequest;
+
+import javax.servlet.http.HttpServletRequest;
+
 
 /**
 * @author 31179

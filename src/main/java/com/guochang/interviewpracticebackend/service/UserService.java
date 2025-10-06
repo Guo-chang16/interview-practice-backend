@@ -6,11 +6,8 @@ import com.guochang.interviewpracticebackend.model.dto.user.UserQueryRequest;
 import com.guochang.interviewpracticebackend.model.entity.User;
 import com.guochang.interviewpracticebackend.model.vo.LoginUserVO;
 import com.guochang.interviewpracticebackend.model.vo.UserVO;
-import jakarta.servlet.http.HttpServletRequest;
-
-import java.time.LocalDate;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
 
 
 /**
