@@ -6,7 +6,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.guochang.interviewpracticebackend.model.dto.question.QuestionQueryRequest;
 import com.guochang.interviewpracticebackend.model.entity.Question;
 import com.guochang.interviewpracticebackend.model.vo.QuestionVO;
-import jakarta.servlet.http.HttpServletRequest;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
 * @author 31179
@@ -55,4 +56,13 @@ public interface QuestionService extends IService<Question> {
      * @return
      */
     Page<Question> listQuestionByPage(QuestionQueryRequest questionQueryRequest);
+
+    /**
+     * 从 ES 查询题目
+     *
+     * @param questionQueryRequest
+     * @return
+     */
+    Page<Question> searchFromEs(QuestionQueryRequest questionQueryRequest);
+
 }

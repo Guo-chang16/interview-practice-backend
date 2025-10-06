@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.12</version>
+        <version>2.7.18</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.guochang</groupId>
@@ -39,6 +39,26 @@
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
             <version>3.21.0</version>
+        </dependency>
+
+        <!-- Elasticsearch 核心 Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
+
+        <!-- 高级 REST 客户端（与 ES 服务器版本一致） -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.17.29</version>
+        </dependency>
+
+        <!-- Elasticsearch 核心库 -->
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>7.17.29</version>
         </dependency>
 
 
@@ -77,19 +97,19 @@
             <version>5.8.37</version>
         </dependency>
 
-        <!--knife4j-->
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
-            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+            <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
             <version>4.4.0</version>
         </dependency>
 
-        <!--mybatis-plus 注意要删除mybatis依赖-->
+
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-            <version>3.5.6</version>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.5.2</version>
         </dependency>
+
 
         <!--spring-aop 权限校验-->
         <dependency>
@@ -102,6 +122,7 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+
 
     </dependencies>
 
