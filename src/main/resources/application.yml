@@ -9,6 +9,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/interview_practice?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8
 
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      password:
+      ttl: 3600
 
 server:
   port: 8150

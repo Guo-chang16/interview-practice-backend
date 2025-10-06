@@ -35,6 +35,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson</artifactId>
+            <version>3.21.0</version>
+        </dependency>
+
+
         <!-- 替代你之前手动加的hibernate-validator和jakarta.validation-api -->
         <!-- Spring Boot 3.x官方校验starter，自动包含： -->
         <!-- 1. jakarta.validation-api（Jakarta EE规范接口） -->

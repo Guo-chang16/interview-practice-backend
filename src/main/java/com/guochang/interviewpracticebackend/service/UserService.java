@@ -8,7 +8,9 @@ import com.guochang.interviewpracticebackend.model.vo.LoginUserVO;
 import com.guochang.interviewpracticebackend.model.vo.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -99,4 +101,9 @@ public interface UserService extends IService<User> {
      * @return
      */
     QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
+
+
+    Boolean addUserSignIn(long userId);
+
+    List<Integer> getUserSignInRecord(long userId,Integer year);
 }
