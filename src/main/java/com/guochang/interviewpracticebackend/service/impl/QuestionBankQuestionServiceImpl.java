@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.guochang.interviewpracticebackend.common.ErrorCode;
 import com.guochang.interviewpracticebackend.constant.CommonConstant;
+import com.guochang.interviewpracticebackend.exception.BusinessException;
 import com.guochang.interviewpracticebackend.exception.ThrowUtils;
 import com.guochang.interviewpracticebackend.mapper.QuestionBankQuestionMapper;
 import com.guochang.interviewpracticebackend.model.dto.questionBankQuestion.QuestionBankQuestionQueryRequest;
@@ -23,9 +24,12 @@ import com.guochang.interviewpracticebackend.service.QuestionBankService;
 import com.guochang.interviewpracticebackend.service.QuestionService;
 import com.guochang.interviewpracticebackend.service.UserService;
 import com.guochang.interviewpracticebackend.utils.SqlUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +46,7 @@ import java.util.stream.Collectors;
  * @createDate 2025-10-04 11:20:29
  */
 @Service
+@Slf4j
 public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQuestionMapper, QuestionBankQuestion>
         implements QuestionBankQuestionService {
 
@@ -79,20 +84,6 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
             QuestionBank questionBank = questionBankService.getById(questionBankId);
             ThrowUtils.throwIf(questionBank == null, ErrorCode.NOT_FOUND_ERROR, "题库不存在");
         }
-
-        // 不需要校验
-//        // todo 从对象中取值
-//        String title = questionBankQuestion.getTitle();
-//        // 创建数据时，参数不能为空
-//        if (add) {
-//            // todo 补充校验规则
-//            ThrowUtils.throwIf(StringUtils.isBlank(title), ErrorCode.PARAMS_ERROR);
-//        }
-//        // 修改数据时，有参数则校验
-//        // todo 补充校验规则
-//        if (StringUtils.isNotBlank(title)) {
-//            ThrowUtils.throwIf(title.length() > 80, ErrorCode.PARAMS_ERROR, "标题过长");
-//        }
     }
 
     /**
@@ -107,7 +98,6 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         if (questionBankQuestionQueryRequest == null) {
             return queryWrapper;
         }
-        // todo 从对象中取值
         Long id = questionBankQuestionQueryRequest.getId();
         Long notId = questionBankQuestionQueryRequest.getNotId();
         String sortField = questionBankQuestionQueryRequest.getSortField();
@@ -115,7 +105,6 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         Long questionBankId = questionBankQuestionQueryRequest.getQuestionBankId();
         Long questionId = questionBankQuestionQueryRequest.getQuestionId();
         Long userId = questionBankQuestionQueryRequest.getUserId();
-        // todo 补充需要的查询条件
         // 精确查询
         queryWrapper.ne(ObjectUtils.isNotEmpty(notId), "id", notId);
         queryWrapper.eq(ObjectUtils.isNotEmpty(id), "id", id);
@@ -237,8 +226,24 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
             questionBankQuestion.setQuestionBankId(questionBankId);
             questionBankQuestion.setQuestionId(questionId);
             questionBankQuestion.setUserId(loginUser.getId());
-            boolean save = questionBankQuestionService.save(questionBankQuestion);
-            ThrowUtils.throwIf(!save, ErrorCode.OPERATION_ERROR, "批量添加题目失败");
+            try {
+                boolean result = this.save(questionBankQuestion);
+                if (!result) {
+                    throw new BusinessException(ErrorCode.OPERATION_ERROR, "向题库添加题目失败");
+                }
+            } catch (DataIntegrityViolationException e) {
+                log.error("数据库唯一键冲突或违反其他完整性约束，题目 id: {}, 题库 id: {}, 错误信息: {}", questionId, questionBankId, e.getMessage());
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "题目已存在于该题库，无法重复添加");
+            } catch (DataAccessException e) {
+                log.error("数据库连接问题、事务问题等导致操作失败，题目 id: {}, 题库 id: {}, 错误信息: {}",
+                        questionId, questionBankId, e.getMessage());
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "数据库操作失败");
+            } catch (Exception e) {
+                // 捕获其他异常，做通用处理
+                log.error("添加题目到题库时发生未知错误，题目 id: {}, 题库 id: {}, 错误信息: {}",
+                        questionId, questionBankId, e.getMessage());
+                throw new BusinessException(ErrorCode.OPERATION_ERROR, "向题库添加题目失败");
+            }
         }
 
     }
