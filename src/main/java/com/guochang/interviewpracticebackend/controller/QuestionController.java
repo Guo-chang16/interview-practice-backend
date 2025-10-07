@@ -11,10 +11,7 @@ import com.guochang.interviewpracticebackend.common.Result;
 import com.guochang.interviewpracticebackend.constant.UserConstant;
 import com.guochang.interviewpracticebackend.exception.BusinessException;
 import com.guochang.interviewpracticebackend.exception.ThrowUtils;
-import com.guochang.interviewpracticebackend.model.dto.question.QuestionAddRequest;
-import com.guochang.interviewpracticebackend.model.dto.question.QuestionEditRequest;
-import com.guochang.interviewpracticebackend.model.dto.question.QuestionQueryRequest;
-import com.guochang.interviewpracticebackend.model.dto.question.QuestionUpdateRequest;
+import com.guochang.interviewpracticebackend.model.dto.question.*;
 import com.guochang.interviewpracticebackend.model.entity.Question;
 import com.guochang.interviewpracticebackend.model.entity.User;
 import com.guochang.interviewpracticebackend.model.vo.QuestionVO;
@@ -244,6 +241,15 @@ public class QuestionController {
         ThrowUtils.throwIf(size > 200, ErrorCode.PARAMS_ERROR);
         Page<Question> questionPage = questionService.searchFromEs(questionQueryRequest);
         return Result.success(questionService.getQuestionVOPage(questionPage, request));
+    }
+
+    @PostMapping("/delete/batch")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public BaseResponse<Boolean> batchDeleteQuestions(@RequestBody QuestionBatchDeleteRequest questionBatchDeleteRequest,
+                                                      HttpServletRequest request) {
+        ThrowUtils.throwIf(questionBatchDeleteRequest == null, ErrorCode.PARAMS_ERROR);
+        questionService.batchDeleteQuestions(questionBatchDeleteRequest.getQuestionIdList());
+        return Result.success(true);
     }
 
 

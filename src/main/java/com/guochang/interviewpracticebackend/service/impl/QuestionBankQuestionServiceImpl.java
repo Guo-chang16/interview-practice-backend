@@ -1,7 +1,9 @@
 package com.guochang.interviewpracticebackend.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.guochang.interviewpracticebackend.common.ErrorCode;
@@ -34,33 +36,36 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
-* @author 31179
-* @description 针对表【question_bank_question(题库题目)】的数据库操作Service实现
-* @createDate 2025-10-04 11:20:29
-*/
+ * @author 31179
+ * @description 针对表【question_bank_question(题库题目)】的数据库操作Service实现
+ * @createDate 2025-10-04 11:20:29
+ */
 @Service
 public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQuestionMapper, QuestionBankQuestion>
-    implements QuestionBankQuestionService {
+        implements QuestionBankQuestionService {
 
 
-        @Resource
-        private UserService userService;
+    @Resource
+    private UserService userService;
 
-        @Resource
-        @Lazy
-        private QuestionService questionService;
+    @Resource
+    @Lazy
+    private QuestionService questionService;
 
-        @Resource
-        private QuestionBankService questionBankService;
+    @Resource
+    private QuestionBankService questionBankService;
 
-        /**
-         * 校验数据
-         *
-         * @param questionBankQuestion
-         * @param add      对创建的数据进行校验
-         */
-        @Override
-        public void validQuestionBankQuestion(QuestionBankQuestion questionBankQuestion, boolean add) {
+    @Resource
+    private QuestionBankQuestionService questionBankQuestionService;
+
+    /**
+     * 校验数据
+     *
+     * @param questionBankQuestion
+     * @param add      对创建的数据进行校验
+     */
+    @Override
+    public void validQuestionBankQuestion(QuestionBankQuestion questionBankQuestion, boolean add) {
         ThrowUtils.throwIf(questionBankQuestion == null, ErrorCode.PARAMS_ERROR);
         // 题目和题库必须存在
         Long questionId = questionBankQuestion.getQuestionId();
@@ -89,14 +94,14 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
 //        }
     }
 
-        /**
-         * 获取查询条件
-         *
-         * @param questionBankQuestionQueryRequest
-         * @return
-         */
-        @Override
-        public QueryWrapper<QuestionBankQuestion> getQueryWrapper(QuestionBankQuestionQueryRequest questionBankQuestionQueryRequest) {
+    /**
+     * 获取查询条件
+     *
+     * @param questionBankQuestionQueryRequest
+     * @return
+     */
+    @Override
+    public QueryWrapper<QuestionBankQuestion> getQueryWrapper(QuestionBankQuestionQueryRequest questionBankQuestionQueryRequest) {
         QueryWrapper<QuestionBankQuestion> queryWrapper = new QueryWrapper<>();
         if (questionBankQuestionQueryRequest == null) {
             return queryWrapper;
@@ -124,15 +129,15 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
     }
 
 
-        /**
-         * 获取题库题目关联封装
-         *
-         * @param questionBankQuestion
-         * @param request
-         * @return
-         */
-        @Override
-        public QuestionBankQuestionVO getQuestionBankQuestionVO(QuestionBankQuestion questionBankQuestion, HttpServletRequest request) {
+    /**
+     * 获取题库题目关联封装
+     *
+     * @param questionBankQuestion
+     * @param request
+     * @return
+     */
+    @Override
+    public QuestionBankQuestionVO getQuestionBankQuestionVO(QuestionBankQuestion questionBankQuestion, HttpServletRequest request) {
         // 对象转封装类
         QuestionBankQuestionVO questionBankQuestionVO = QuestionBankQuestionVO.objToVo(questionBankQuestion);
 
@@ -148,15 +153,15 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         return questionBankQuestionVO;
     }
 
-        /**
-         * 分页获取题库题目关联封装
-         *
-         * @param questionBankQuestionPage
-         * @param request
-         * @return
-         */
-        @Override
-        public Page<QuestionBankQuestionVO> getQuestionBankQuestionVOPage(Page<QuestionBankQuestion> questionBankQuestionPage, HttpServletRequest request) {
+    /**
+     * 分页获取题库题目关联封装
+     *
+     * @param questionBankQuestionPage
+     * @param request
+     * @return
+     */
+    @Override
+    public Page<QuestionBankQuestionVO> getQuestionBankQuestionVOPage(Page<QuestionBankQuestion> questionBankQuestionPage, HttpServletRequest request) {
         List<QuestionBankQuestion> questionBankQuestionList = questionBankQuestionPage.getRecords();
         Page<QuestionBankQuestionVO> questionBankQuestionVOPage = new Page<>(questionBankQuestionPage.getCurrent(), questionBankQuestionPage.getSize(), questionBankQuestionPage.getTotal());
         if (CollUtil.isEmpty(questionBankQuestionList)) {
@@ -187,6 +192,63 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
 
         questionBankQuestionVOPage.setRecords(questionBankQuestionVOList);
         return questionBankQuestionVOPage;
+    }
+
+    @Override
+    public void batchAddQuestionToBank(List<Long> questionIdList, Long questionBankId, User loginUser) {
+        //参数校验
+        ThrowUtils.throwIf(questionIdList == null || questionIdList.isEmpty(), ErrorCode.PARAMS_ERROR, "传入的id列表不能为空");
+        ThrowUtils.throwIf(questionBankId <= 0, ErrorCode.PARAMS_ERROR, "题库id不能为空");
+        ThrowUtils.throwIf(loginUser == null, ErrorCode.PARAMS_ERROR, "；当前用户未登录,无法进行该操作");
+
+        // 判断题库是否存在
+        QuestionBank questionBank = questionBankService.getById(questionBankId);
+        ThrowUtils.throwIf(questionBank == null, ErrorCode.NOT_FOUND_ERROR, "题库不存在");
+
+        //判断题目是否存在
+        List<Question> questionList = questionService.listByIds(questionIdList);
+        List<Long> validQuestionIdList = questionList.stream()
+                .map(Question::getId)
+                .collect(Collectors.toList());
+        ThrowUtils.throwIf(validQuestionIdList.size() != questionIdList.size(), ErrorCode.NOT_FOUND_ERROR, "部分题目不存在");
+
+        //批量添加题目
+        for (Long questionId : validQuestionIdList) {
+            QuestionBankQuestion questionBankQuestion = new QuestionBankQuestion();
+            questionBankQuestion.setQuestionBankId(questionBankId);
+            questionBankQuestion.setQuestionId(questionId);
+            questionBankQuestion.setUserId(loginUser.getId());
+            boolean save = questionBankQuestionService.save(questionBankQuestion);
+            ThrowUtils.throwIf(!save, ErrorCode.OPERATION_ERROR, "批量添加题目失败");
+        }
+
+    }
+
+    @Override
+    public void batchRemoveQuestionsFromBank(List<Long> questionIdList, Long questionBankId) {
+        //参数校验
+        ThrowUtils.throwIf(questionIdList == null || questionIdList.isEmpty(), ErrorCode.PARAMS_ERROR, "传入的id列表不能为空");
+        ThrowUtils.throwIf(questionBankId <= 0, ErrorCode.PARAMS_ERROR, "题库id不能为空");
+
+        // 判断题库是否存在
+        QuestionBank questionBank = questionBankService.getById(questionBankId);
+        ThrowUtils.throwIf(questionBank == null, ErrorCode.NOT_FOUND_ERROR, "题库不存在");
+
+        //判断题目是否存在
+        List<Question> questionList = questionService.listByIds(questionIdList);
+        List<Long> validQuestionIdList = questionList.stream()
+                .map(Question::getId)
+                .collect(Collectors.toList());
+        ThrowUtils.throwIf(validQuestionIdList.size() != questionIdList.size(), ErrorCode.NOT_FOUND_ERROR, "部分题目不存在");
+
+        //批量移除题目
+        for (Long questionId : validQuestionIdList) {
+            LambdaQueryWrapper<QuestionBankQuestion> lambdaQueryWrapper = Wrappers.lambdaQuery(QuestionBankQuestion.class)
+                    .eq(QuestionBankQuestion::getQuestionId, questionId)    // 不同题目ID
+                    .eq(QuestionBankQuestion::getQuestionBankId, questionBankId);   // 固定题库ID(当前题库)
+            boolean removed = questionBankQuestionService.remove(lambdaQueryWrapper);
+            ThrowUtils.throwIf(!removed, ErrorCode.OPERATION_ERROR, "批量移除题目失败");
+        }
     }
 
 

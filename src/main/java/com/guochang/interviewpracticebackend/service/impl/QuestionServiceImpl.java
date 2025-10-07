@@ -47,8 +47,6 @@ import java.util.stream.Collectors;
 
 /**
 * @author 31179
-* @description 针对表【question(题目)】的数据库操作Service实现
-* @createDate 2025-10-04 11:20:13
 */
 @Service
 public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
@@ -319,6 +317,19 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         }
         page.setRecords(resourceList);
         return page;
+    }
+
+    @Override
+    public void batchDeleteQuestions(List<Long> questionIdList) {
+        ThrowUtils.throwIf(CollUtil.isEmpty(questionIdList), ErrorCode.PARAMS_ERROR);
+        for (Long questionId : questionIdList){
+            boolean removed = this.removeById(questionId);
+            ThrowUtils.throwIf(!removed, ErrorCode.OPERATION_ERROR);
+            LambdaQueryWrapper<QuestionBankQuestion> lambdaQueryWrapper = Wrappers.lambdaQuery(QuestionBankQuestion.class)
+                    .eq(QuestionBankQuestion::getQuestionId,questionId);
+            removed = questionBankQuestionService.remove(lambdaQueryWrapper);
+            ThrowUtils.throwIf(!removed, ErrorCode.OPERATION_ERROR);
+        }
     }
 }
 
