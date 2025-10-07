@@ -197,11 +197,13 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         ThrowUtils.throwIf(questionBank == null, ErrorCode.NOT_FOUND_ERROR, "题库不存在");
 
         //判断题目是否存在
-        List<Question> questionList = questionService.listByIds(questionIdList);
-        List<Long> validQuestionIdList = questionList.stream()
-                .map(Question::getId)
-                .collect(Collectors.toList());
-        ThrowUtils.throwIf(validQuestionIdList.size() != questionIdList.size(), ErrorCode.NOT_FOUND_ERROR, "部分题目不存在");
+        // 检查题目 id 是否存在
+        LambdaQueryWrapper<Question> questionLambdaQueryWrapper = Wrappers.lambdaQuery(Question.class)
+                .select(Question::getId)
+                .in(Question::getId, questionIdList);
+        List<Question> questionList = questionService.list(questionLambdaQueryWrapper);
+        List<Long> validQuestionIdList = questionService.listObjs(questionLambdaQueryWrapper, obj -> (Long) obj);
+        ThrowUtils.throwIf(CollUtil.isEmpty(validQuestionIdList), ErrorCode.PARAMS_ERROR, "合法的题目列表为空");
 
         // 检查哪些题目还不存在于题库中，避免重复插入
         LambdaQueryWrapper<QuestionBankQuestion> lambdaQueryWrapper = Wrappers.lambdaQuery(QuestionBankQuestion.class)
