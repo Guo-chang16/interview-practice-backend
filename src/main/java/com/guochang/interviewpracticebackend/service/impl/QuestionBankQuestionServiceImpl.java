@@ -27,6 +27,7 @@ import com.guochang.interviewpracticebackend.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -185,7 +186,6 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void batchAddQuestionToBank(List<Long> questionIdList, Long questionBankId, User loginUser) {
         //参数校验
         ThrowUtils.throwIf(questionIdList == null || questionIdList.isEmpty(), ErrorCode.PARAMS_ERROR, "传入的id列表不能为空");
@@ -220,19 +220,37 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         }).collect(Collectors.toList());
         ThrowUtils.throwIf(CollUtil.isEmpty(validQuestionIdList), ErrorCode.PARAMS_ERROR, "所有题目都已存在于题库中");
 
-        //批量添加题目
-        for (Long questionId : validQuestionIdList) {
-            QuestionBankQuestion questionBankQuestion = new QuestionBankQuestion();
-            questionBankQuestion.setQuestionBankId(questionBankId);
-            questionBankQuestion.setQuestionId(questionId);
-            questionBankQuestion.setUserId(loginUser.getId());
+        //分批处理,避免长事务
+        int batchSize = 1000;
+        int totalQuestionListSize= validQuestionIdList.size();
+        for (int i = 0; i < totalQuestionListSize; i++) {
+            List<Long> subList = validQuestionIdList.subList(i, Math.min(i + batchSize, totalQuestionListSize));
+            List<QuestionBankQuestion> questionBankQuestionList = subList.stream().map(questionId -> {
+                QuestionBankQuestion questionBankQuestion = new QuestionBankQuestion();
+                questionBankQuestion.setQuestionBankId(questionBankId);
+                questionBankQuestion.setQuestionId(questionId);
+                questionBankQuestion.setUserId(loginUser.getId());
+                return questionBankQuestion;
+            }).collect(Collectors.toList());
+
+            // 使用事务处理每批数据
+            QuestionBankQuestionService questionBankQuestionService = (QuestionBankQuestionServiceImpl) AopContext.currentProxy();
+            questionBankQuestionService.batchAddQuestionsToBankInner(questionBankQuestionList);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchAddQuestionsToBankInner(List<QuestionBankQuestion> questionBankQuestions) {
+        for (QuestionBankQuestion questionBankQuestion : questionBankQuestions) {
+            long questionId = questionBankQuestion.getQuestionId();
+            long questionBankId = questionBankQuestion.getQuestionBankId();
             try {
                 boolean result = this.save(questionBankQuestion);
-                if (!result) {
-                    throw new BusinessException(ErrorCode.OPERATION_ERROR, "向题库添加题目失败");
-                }
+                ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "向题库添加题目失败");
             } catch (DataIntegrityViolationException e) {
-                log.error("数据库唯一键冲突或违反其他完整性约束，题目 id: {}, 题库 id: {}, 错误信息: {}", questionId, questionBankId, e.getMessage());
+                log.error("数据库唯一键冲突或违反其他完整性约束，题目 id: {}, 题库 id: {}, 错误信息: {}",
+                        questionId, questionBankId, e.getMessage());
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "题目已存在于该题库，无法重复添加");
             } catch (DataAccessException e) {
                 log.error("数据库连接问题、事务问题等导致操作失败，题目 id: {}, 题库 id: {}, 错误信息: {}",
@@ -245,7 +263,6 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
                 throw new BusinessException(ErrorCode.OPERATION_ERROR, "向题库添加题目失败");
             }
         }
-
     }
 
     @Override
