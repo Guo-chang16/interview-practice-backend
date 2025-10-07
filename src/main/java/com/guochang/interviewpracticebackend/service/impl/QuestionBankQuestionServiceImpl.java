@@ -214,6 +214,23 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
                 .collect(Collectors.toList());
         ThrowUtils.throwIf(validQuestionIdList.size() != questionIdList.size(), ErrorCode.NOT_FOUND_ERROR, "部分题目不存在");
 
+        // 检查哪些题目还不存在于题库中，避免重复插入
+        LambdaQueryWrapper<QuestionBankQuestion> lambdaQueryWrapper = Wrappers.lambdaQuery(QuestionBankQuestion.class)
+                .eq(QuestionBankQuestion::getQuestionBankId, questionBankId)
+                .in(QuestionBankQuestion::getQuestionId, validQuestionIdList);
+        List<QuestionBankQuestion> existQuestionList = this.list(lambdaQueryWrapper);
+
+        // 已存在于题库中的题目 id
+        Set<Long> existQuestionIdSet = existQuestionList.stream()
+                .map(QuestionBankQuestion::getQuestionId)
+                .collect(Collectors.toSet());
+
+        // 已存在于题库中的题目 id，不需要再次添加
+        validQuestionIdList = validQuestionIdList.stream().filter(questionId -> {
+            return !existQuestionIdSet.contains(questionId);
+        }).collect(Collectors.toList());
+        ThrowUtils.throwIf(CollUtil.isEmpty(validQuestionIdList), ErrorCode.PARAMS_ERROR, "所有题目都已存在于题库中");
+
         //批量添加题目
         for (Long questionId : validQuestionIdList) {
             QuestionBankQuestion questionBankQuestion = new QuestionBankQuestion();
