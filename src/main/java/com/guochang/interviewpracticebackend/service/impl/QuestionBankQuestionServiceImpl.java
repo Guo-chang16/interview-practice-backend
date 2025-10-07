@@ -27,6 +27,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -195,6 +196,7 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchAddQuestionToBank(List<Long> questionIdList, Long questionBankId, User loginUser) {
         //参数校验
         ThrowUtils.throwIf(questionIdList == null || questionIdList.isEmpty(), ErrorCode.PARAMS_ERROR, "传入的id列表不能为空");
@@ -225,6 +227,7 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchRemoveQuestionsFromBank(List<Long> questionIdList, Long questionBankId) {
         //参数校验
         ThrowUtils.throwIf(questionIdList == null || questionIdList.isEmpty(), ErrorCode.PARAMS_ERROR, "传入的id列表不能为空");

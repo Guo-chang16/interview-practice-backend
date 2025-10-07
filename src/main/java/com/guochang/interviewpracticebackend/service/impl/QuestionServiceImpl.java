@@ -37,6 +37,8 @@ import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -320,6 +322,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchDeleteQuestions(List<Long> questionIdList) {
         ThrowUtils.throwIf(CollUtil.isEmpty(questionIdList), ErrorCode.PARAMS_ERROR);
         for (Long questionId : questionIdList){
