@@ -36,9 +36,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 /**
@@ -222,9 +224,15 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
         }).collect(Collectors.toList());
         ThrowUtils.throwIf(CollUtil.isEmpty(validQuestionIdList), ErrorCode.PARAMS_ERROR, "所有题目都已存在于题库中");
 
+        // 创建线程池
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(20, 50, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(1000), new ThreadPoolExecutor.CallerRunsPolicy());
+
+        //保存所有批次任务
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+
         //分批处理,避免长事务
         int batchSize = 1000;
-        int totalQuestionListSize= validQuestionIdList.size();
+        int totalQuestionListSize = validQuestionIdList.size();
         for (int i = 0; i < totalQuestionListSize; i++) {
             List<Long> subList = validQuestionIdList.subList(i, Math.min(i + batchSize, totalQuestionListSize));
             List<QuestionBankQuestion> questionBankQuestionList = subList.stream().map(questionId -> {
@@ -237,7 +245,21 @@ public class QuestionBankQuestionServiceImpl extends ServiceImpl<QuestionBankQue
 
             // 使用事务处理每批数据
             QuestionBankQuestionService questionBankQuestionService = (QuestionBankQuestionServiceImpl) AopContext.currentProxy();
-            questionBankQuestionService.batchAddQuestionsToBankInner(questionBankQuestionList);
+
+            // 异步执行保存操作
+            CompletableFuture<Void> future = CompletableFuture
+                    .runAsync(() -> questionBankQuestionService.batchAddQuestionsToBankInner(questionBankQuestionList),
+                            threadPoolExecutor).exceptionally(ex -> {
+                                log.error("批处理任务执行失败", ex);
+                                return null;});
+            futures.add(future);
+
+            // 等待所有批次操作完成
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+            //关闭线程池
+            threadPoolExecutor.shutdown();
+
         }
     }
 
