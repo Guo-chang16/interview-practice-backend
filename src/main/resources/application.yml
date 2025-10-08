@@ -3,6 +3,9 @@ spring:
     name: spring-init-project
   profiles:
     active: local
+  main:
+    allow-circular-references: true
+
 
   # ?????
   datasource:
@@ -21,8 +24,6 @@ server:
   port: 8150
   servlet:
     context-path: /api
-
-
 
 # springdoc-openapi
 springdoc:
