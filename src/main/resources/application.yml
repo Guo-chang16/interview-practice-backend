@@ -1,6 +1,6 @@
 spring:
   application:
-    name: spring-init-project
+    name: interview_practice_backend
   profiles:
     active: local
   main:

@@ -11,8 +11,8 @@
     <groupId>com.guochang</groupId>
     <artifactId>interview-practice-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>spring-init-project</name>
-    <description>spring-init-project</description>
+    <name>interview_practice_backend</name>
+    <description>interview_practice_backend</description>
     <url/>
     <licenses>
         <license/>
@@ -27,13 +27,21 @@
         <url/>
     </scm>
     <properties>
-        <java.version>17</java.version>
+        <java.version>8</java.version>
     </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
+        <!--引入sentinel-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+            <version>2021.0.5.0</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.redisson</groupId>
